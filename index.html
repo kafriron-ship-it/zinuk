@@ -46,6 +46,7 @@
     margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);direction:rtl;
     -webkit-user-select:none;user-select:none;overflow:hidden;-webkit-tap-highlight-color:transparent;
   }
+  input,textarea{-webkit-user-select:text;user-select:text}   /* iPhone won't let you type into fields that inherit user-select:none */
   #app{
     position:relative;z-index:1;
     height:100%;display:flex;flex-direction:column;gap:8px;
@@ -193,6 +194,13 @@
   .about details[open] summary::after{transform:rotate(-90deg)}
   .about p{margin:0;padding:0 14px 12px;color:var(--muted);font-size:14px;line-height:1.6;-webkit-user-select:text;user-select:text}
   .about details[open]{padding-bottom:4px}
+  .fb{max-height:92vh;overflow-y:auto}
+  .fb-types{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
+  .fb-label{display:block;margin:14px 2px 6px;font-size:13px;font-weight:800;color:var(--muted)}
+  .fb textarea,.fb input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px;font-family:var(--font);font-size:16px;line-height:1.5}
+  .fb textarea{resize:vertical;min-height:96px}
+  .fb textarea:focus,.fb input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .fb-hp{position:absolute!important;left:-9999px;width:1px!important;height:1px;opacity:0}
   .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:var(--fg);color:var(--bg);font-weight:800;font-size:15px;padding:11px 18px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:fadeIn .2s;white-space:nowrap;unicode-bidi:plaintext;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
 
   /* ---- install-to-home-screen sheet ---- */
@@ -327,9 +335,10 @@
       </div>
     </div>
 
-    <h3>שיתוף</h3>
+    <h3>שיתוף ומשוב</h3>
     <div class="card">
       <div class="srow"><div><b>שתף את זינוק</b><small>שלח את הקישור למדריכים אחרים</small></div><button class="pill amber" id="shareBtn" aria-pressed="true">שתף</button></div>
+      <div class="srow" id="rowFeedback" hidden><div><b>רעיון לשיפור?</b><small>כתוב לנו מה היית משפר, אנחנו קוראים הכל</small></div><button class="pill amber" id="fbOpen" aria-pressed="true">כתוב</button></div>
     </div>
 
     <h3>מראה</h3>
@@ -346,7 +355,8 @@
       <details>
         <summary>פרטיות</summary>
         <p>זינוק לא אוסף מידע אישי: אין הרשמה, אין מעקב, אין פרסומות ואין עוגיות. ההגדרות והזמנים השמורים נשמרים רק בטלפון שלך ולא נשלחים לשום מקום.</p>
-        <p>האתר מתארח ב‑GitHub Pages. כמו כל שרת, GitHub רושם נתונים טכניים בסיסיים של הגלישה, למשל כתובת IP, לפי מדיניות הפרטיות שלו. האפליקציה לא פונה לשום שירות אחר.</p>
+        <p>האתר מתארח ב‑GitHub Pages. כמו כל שרת, GitHub רושם נתונים טכניים בסיסיים של הגלישה, למשל כתובת IP, לפי מדיניות הפרטיות שלו.</p>
+        <p>אם שולחים רעיון לשיפור, נשמרים רק מה שכתבת, השם אם הוספת, וסוג המכשיר (אייפון או אנדרואיד). הם נשמרים בגיליון פרטי של מפתח האפליקציה ב‑Google, ומשמשים רק לשיפור זינוק. חוץ מזה האפליקציה לא פונה לשום שירות אחר.</p>
       </details>
       <details>
         <summary>קרדיטים ורישיונות</summary>
@@ -360,6 +370,27 @@
 </section>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<div class="install-bg" id="fbBg" hidden></div>
+<form class="install fb" id="fbSheet" role="dialog" aria-modal="true" aria-labelledby="fbTitle" hidden novalidate>
+  <div class="inst-head">
+    <div><b id="fbTitle">רעיון לשיפור</b><small>מה היית משפר או מוסיף בזינוק?</small></div>
+  </div>
+  <div class="fb-types" role="radiogroup" aria-label="סוג">
+    <button type="button" class="chip" data-t="רעיון" aria-pressed="true">💡 רעיון</button>
+    <button type="button" class="chip" data-t="תקלה" aria-pressed="false">🐞 תקלה</button>
+    <button type="button" class="chip" data-t="אחר" aria-pressed="false">💬 אחר</button>
+  </div>
+  <label class="fb-label" for="fbMsg">ההצעה שלך</label>
+  <textarea id="fbMsg" maxlength="2000" rows="4" placeholder="למשל: הייתי רוצה שיהיה אפשר…"></textarea>
+  <label class="fb-label" for="fbName">שם (לא חובה)</label>
+  <input id="fbName" maxlength="60" autocomplete="name" placeholder="איך לקרוא לך">
+  <input id="fbHp" class="fb-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="inst-actions">
+    <button type="button" class="btn ghost-txt" id="fbCancel">ביטול</button>
+    <button type="submit" class="btn go" id="fbSend">שלח</button>
+  </div>
+</form>
 
 <div class="install-bg" id="installBg" hidden></div>
 <div class="install" id="install" role="dialog" aria-modal="true" aria-labelledby="instTitle" hidden>
@@ -1058,6 +1089,55 @@
     try{ await navigator.clipboard.writeText(SHARE_TEXT+'\n'+SHARE_URL); toast('הקישור הועתק, אפשר להדביק בוואטסאפ'); }
     catch(e){ toast(SHARE_URL); }
   };
+
+  /* ---- feedback: written in the app, stored in the owner's Google Sheet (via Apps Script); queued offline ---- */
+  const FEEDBACK_URL='';   // Apps Script web-app URL; the row stays hidden until it is set
+  (function(){
+    const QKEY='zinuk.fbQueue';
+    const sheet=$('#fbSheet'),bg=$('#fbBg');
+    let type='רעיון';
+    const loadQ=()=>{ try{ return JSON.parse(localStorage.getItem(QKEY)||'[]'); }catch(e){ return []; } };
+    const saveQ=q=>{ try{ localStorage.setItem(QKEY,JSON.stringify(q.slice(-20))); }catch(e){} };
+    const device=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)?'iPhone':/Android/.test(navigator.userAgent)?'Android':'אחר';
+    async function post(item){
+      const body=JSON.stringify(item);
+      try{
+        const r=await fetch(FEEDBACK_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});
+        const j=await r.json().catch(()=>({ok:r.ok})); return !!j.ok;
+      }catch(e){
+        if(!navigator.onLine) return false;
+        try{ await fetch(FEEDBACK_URL,{method:'POST',mode:'no-cors',body}); return true; }catch(e2){ return false; }
+      }
+    }
+    async function flush(){
+      if(!FEEDBACK_URL||!navigator.onLine) return;
+      const q=loadQ(); if(!q.length) return;
+      const left=[]; for(const it of q){ if(!(await post(it))) left.push(it); }
+      saveQ(left);
+    }
+    function open(){ closeSettings(); sheet.hidden=false; bg.hidden=false; setTimeout(()=>$('#fbMsg').focus(),250); }
+    function close(){ sheet.hidden=true; bg.hidden=true; try{ document.activeElement.blur(); }catch(e){} }
+    sheet.querySelectorAll('.fb-types .chip').forEach(b=>b.onclick=()=>{
+      type=b.dataset.t; sheet.querySelectorAll('.fb-types .chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+    });
+    $('#fbOpen').onclick=open; $('#fbCancel').onclick=close; bg.onclick=close;
+    sheet.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const msg=$('#fbMsg').value.trim();
+      if(!msg){ $('#fbMsg').focus(); toast('כתוב קודם מה היית משפר'); return; }
+      const item={type,msg,name:$('#fbName').value.trim(),hp:$('#fbHp').value,v:'1.4',dev:device(),at:new Date().toISOString()};
+      $('#fbSend').disabled=true;
+      const ok=navigator.onLine&&await post(item);
+      $('#fbSend').disabled=false;
+      if(!ok){ const q=loadQ(); q.push(item); saveQ(q); }
+      $('#fbMsg').value='';
+      close();
+      toast(ok?'תודה! ההצעה נשלחה':'נשמר, יישלח כשתהיה קליטה');
+    });
+    $('#rowFeedback').hidden=!FEEDBACK_URL;
+    addEventListener('online',flush);
+    setTimeout(flush,3000);
+  })();
 
   renderChips(); syncRolling(); reset();
 })();
