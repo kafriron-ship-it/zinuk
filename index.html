@@ -313,7 +313,7 @@
     <div class="card">
       <div class="srow"><div><b>סאונד</b><small>צפירות וביפים</small></div><button class="sw" id="sSound" role="switch" aria-checked="true" aria-label="סאונד"></button></div>
       <div class="srow"><div><b>רטט</b><small>עובד באנדרואיד, אייפון לא תומך</small></div><button class="sw" id="sVibe" role="switch" aria-checked="true" aria-label="רטט"></button></div>
-      <div class="srow"><div><b>ספירה ב‑10 השניות האחרונות</b><small>ביפ בכל שנייה עד ההזנקה</small></div><button class="sw" id="sFinal" role="switch" aria-checked="true" aria-label="ספירה ב‑10 השניות האחרונות"></button></div>
+      <div class="srow"><div><b>ספירה ב‑10 השניות האחרונות</b><small>ביפ ורטט בכל שנייה עד ההזנקה. בנוסף תמיד: כל דקה, ובדקה האחרונה כל 10 שניות</small></div><button class="sw" id="sFinal" role="switch" aria-checked="true" aria-label="ספירה ב‑10 השניות האחרונות"></button></div>
       <div class="srow"><div><b>עוצמה</b></div><input type="range" id="sVol" min="0" max="100" value="90" aria-label="עוצמה"></div>
     </div>
 
@@ -876,6 +876,9 @@
       if(r===60){ if(key('m'+r)){dbeep();vibrate([90,60,90]);} }
       else if(key('m'+r)){beep();vibrate(90);}
     }
+    // last minute: beep + buzz every 10 seconds (50, 40, 30, 20, and 10 when the per-second count is off)
+    if(r>0&&r<60&&r%10===0&&r<state.legTotal&&!(state.finalBeeps&&r<=10)&&key('t'+r)){ beep(); vibrate(80); pulse(); }
+    // last 10 seconds: every second
     if(r<=10&&r>0&&key('c'+r)){ if(state.finalBeeps){ beep(); vibrate(70); } pulse(); }
   }
   function atStart(){
