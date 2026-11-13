@@ -180,6 +180,23 @@
   .seg button{flex:1;height:42px;border:none;border-radius:11px;background:transparent;color:var(--muted);font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer}
   .seg button[aria-pressed="true"]{background:var(--accent);color:#2a1700}
   .credits{color:var(--muted);font-size:12px;line-height:1.5;margin:18px 4px 0}
+
+  /* ---- install-to-home-screen sheet ---- */
+  .install-bg{position:fixed;inset:0;z-index:20;background:rgba(3,10,20,.55);animation:fadeIn .25s}
+  .install{position:fixed;left:0;right:0;bottom:0;z-index:21;max-width:620px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:22px 22px 0 0;padding:20px max(18px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));box-shadow:0 -12px 40px rgba(0,0,0,.35);animation:sheetUp .4s cubic-bezier(.2,.9,.25,1.08)}
+  .inst-head{display:flex;align-items:center;gap:14px}
+  .inst-head img{width:58px;height:58px;border-radius:14px;flex:0 0 auto;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .inst-head b{display:block;font-family:var(--display);font-size:21px;font-weight:800}
+  .inst-head small{display:block;color:var(--muted);font-size:14px;margin-top:3px;font-weight:500}
+  .inst-steps{margin:16px 0 0;padding:0 22px 0 0;display:grid;gap:10px;font-size:15px;line-height:1.5}
+  .inst-steps li::marker{color:var(--accent);font-weight:800}
+  .ishare{width:20px;height:20px;vertical-align:-4px;color:var(--prep)}
+  .inst-note{margin:12px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
+  .inst-actions{display:flex;gap:10px;margin-top:18px}
+  .inst-actions .btn{padding:15px 10px}
+  .btn.ghost-txt{flex:0 0 auto;padding-inline:20px;background:transparent;color:var(--muted);border:1px solid var(--line)}
+  @keyframes sheetUp{from{transform:translateY(100%)}}
+  @keyframes fadeIn{from{opacity:0}}
   .flash{position:fixed;inset:0;pointer-events:none;z-index:5;opacity:0;background:var(--go)}
   .flash.go{animation:flash .9s ease-out}
   .flash.warn{background:var(--warn);animation:flash .6s ease-out}
@@ -289,12 +306,37 @@
     <h3>צליל</h3>
     <div class="card" id="packs" role="radiogroup" aria-label="צליל"></div>
 
+    <div id="rowInstall" hidden>
+      <h3>אפליקציה</h3>
+      <div class="card">
+        <div class="srow"><div><b>התקנה למסך הבית</b><small>נפתח במסך מלא ועובד גם בלי קליטה</small></div><button class="pill amber" id="instOpen" aria-pressed="true">התקן</button></div>
+      </div>
+    </div>
+
     <h3>מראה</h3>
     <div class="card"><div class="seg" id="sTheme"><button data-v="dark">כהה</button><button data-v="light">בהיר</button></div></div>
 
     <p class="credits">הקלטות ברישיון CC0: שריקה מאת SpliceSound (Freesound), תותח ופעמון מאת Joseph Sardin (BigSoundBank.com).</p>
   </div>
 </section>
+
+<div class="install-bg" id="installBg" hidden></div>
+<div class="install" id="install" role="dialog" aria-modal="true" aria-labelledby="instTitle" hidden>
+  <div class="inst-head">
+    <img src="icons/icon-192.png" alt="">
+    <div><b id="instTitle">התקן את זינוק</b><small>נפתח במסך מלא, כמו אפליקציה, ועובד גם בלי קליטה בים</small></div>
+  </div>
+  <ol class="inst-steps" id="instIOS" hidden>
+    <li>לחץ על כפתור השיתוף <svg class="ishare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="שיתוף"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg> בסרגל של ספארי</li>
+    <li>גלול למטה ובחר <b>"הוסף למסך הבית"</b></li>
+    <li>לחץ <b>"הוסף"</b> בפינה, וזינוק יופיע במסך הבית</li>
+  </ol>
+  <p class="inst-note" id="instInApp" hidden>פתחת את הקישור מתוך וואטסאפ או אפליקציה אחרת? פתח אותו קודם בספארי, ושם תוכל להוסיף למסך הבית.</p>
+  <div class="inst-actions">
+    <button class="btn ghost-txt" id="instLater">לא עכשיו</button>
+    <button class="btn go" id="instGo">התקן</button>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -923,6 +965,41 @@
   }
   $('#sTheme').querySelectorAll('button').forEach(b=>b.onclick=()=>{ state.theme=b.dataset.v; savePrefs(); applyTheme(); });
   applyTheme();
+
+  /* ---- install to home screen: offered on first open (Android: real prompt, iPhone: steps) ---- */
+  (function(){
+    const KEY='zinuk.installSnooze',DAY=864e5;
+    const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+    const framed=window.top!==window;
+    const ua=navigator.userAgent;
+    const ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    const inApp=/FBAN|FBAV|Instagram|WhatsApp|Line\/|GSA\//i.test(ua);
+    const sheet=$('#install'),bg=$('#installBg');
+    let deferred=null;
+    const canOffer=()=>!standalone&&!framed&&(!!deferred||ios);
+    const snoozed=()=>{ try{ return Date.now()-(+localStorage.getItem(KEY)||0)<14*DAY; }catch(e){ return false; } };
+    const snooze=()=>{ try{ localStorage.setItem(KEY,String(Date.now())); }catch(e){} };
+    const syncRow=()=>{ $('#rowInstall').hidden=!canOffer(); };
+    function open(){
+      if(!canOffer()) return;
+      const steps=!deferred&&ios;
+      $('#instIOS').hidden=!steps; $('#instInApp').hidden=!(steps&&inApp);
+      $('#instGo').textContent=steps?'הבנתי':'התקן';
+      sheet.hidden=false; bg.hidden=false;
+    }
+    function close(){ sheet.hidden=true; bg.hidden=true; }
+    $('#instLater').onclick=()=>{ snooze(); close(); };
+    bg.onclick=()=>{ snooze(); close(); };
+    $('#instGo').onclick=async()=>{
+      if(deferred){ const d=deferred; deferred=null; d.prompt(); try{ await d.userChoice; }catch(e){} syncRow(); }
+      snooze(); close();
+    };
+    $('#instOpen').onclick=()=>{ closeSettings(); open(); };
+    addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferred=e; syncRow(); if(!snoozed()) setTimeout(()=>{ if(!state.running) open(); },1200); });
+    addEventListener('appinstalled',()=>{ deferred=null; close(); syncRow(); });
+    syncRow();
+    if(ios&&canOffer()&&!snoozed()) setTimeout(()=>{ if(!state.running) open(); },1600);
+  })();
 
   renderChips(); syncRolling(); reset();
 })();
