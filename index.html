@@ -179,7 +179,16 @@
   .seg{display:flex;padding:4px;gap:4px}
   .seg button{flex:1;height:42px;border:none;border-radius:11px;background:transparent;color:var(--muted);font-weight:800;font-size:15px;font-family:var(--font);cursor:pointer}
   .seg button[aria-pressed="true"]{background:var(--accent);color:#2a1700}
-  .credits{color:var(--muted);font-size:12px;line-height:1.5;margin:18px 4px 0}
+  .credits{color:var(--muted);font-size:12px;line-height:1.5;margin:18px 4px 0;text-align:center}
+  .about details{border-bottom:1px solid var(--line)}
+  .about details:last-child{border-bottom:none}
+  .about summary{list-style:none;cursor:pointer;padding:14px;font-weight:800;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+  .about summary::-webkit-details-marker{display:none}
+  .about summary::after{content:"‹";color:var(--muted);font-size:20px;transition:transform .2s}
+  .about details[open] summary::after{transform:rotate(-90deg)}
+  .about p{margin:0;padding:0 14px 12px;color:var(--muted);font-size:14px;line-height:1.6;-webkit-user-select:text;user-select:text}
+  .about details[open]{padding-bottom:4px}
+  .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:var(--fg);color:var(--bg);font-weight:800;font-size:15px;padding:11px 18px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:fadeIn .2s;white-space:nowrap;unicode-bidi:plaintext;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
 
   /* ---- install-to-home-screen sheet ---- */
   .install-bg{position:fixed;inset:0;z-index:20;background:rgba(3,10,20,.55);animation:fadeIn .25s}
@@ -313,12 +322,39 @@
       </div>
     </div>
 
+    <h3>שיתוף</h3>
+    <div class="card">
+      <div class="srow"><div><b>שתף את זינוק</b><small>שלח את הקישור למדריכים אחרים</small></div><button class="pill amber" id="shareBtn" aria-pressed="true">שתף</button></div>
+    </div>
+
     <h3>מראה</h3>
     <div class="card"><div class="seg" id="sTheme"><button data-v="dark">כהה</button><button data-v="light">בהיר</button></div></div>
 
-    <p class="credits">הקלטות ברישיון CC0: שריקה מאת SpliceSound (Freesound), תותח ופעמון מאת Joseph Sardin (BigSoundBank.com).</p>
+    <h3>אודות</h3>
+    <div class="card about">
+      <details>
+        <summary>תנאי שימוש</summary>
+        <p>זינוק הוא כלי עזר למדריכי שיוט. הוא ניתן בחינם וכמות שהוא (AS IS), בלי אחריות מכל סוג, והשימוש בו על אחריות המשתמש בלבד.</p>
+        <p>זינוק לא מחליף את דגלי ההזנקה ואת ועדת המרוץ. לפי חוקי השיוט (חוק 26) זמני ההזנקה נקבעים לפי הסימנים החזותיים, וצליל שלא נשמע לא משנה אותם. צליל יכול לא להישמע בגלל טלפון על שקט, עוצמה נמוכה, סוללה או תקלה.</p>
+        <p>האחריות לבטיחות החניכים ולניהול ההזנקה היא של המדריך.</p>
+      </details>
+      <details>
+        <summary>פרטיות</summary>
+        <p>זינוק לא אוסף מידע אישי: אין הרשמה, אין מעקב, אין פרסומות ואין עוגיות. ההגדרות והזמנים השמורים נשמרים רק בטלפון שלך ולא נשלחים לשום מקום.</p>
+        <p>האתר מתארח ב‑GitHub Pages. כמו כל שרת, GitHub רושם נתונים טכניים בסיסיים של הגלישה, למשל כתובת IP, לפי מדיניות הפרטיות שלו. הגופנים נטענים מ‑Google Fonts.</p>
+      </details>
+      <details>
+        <summary>קרדיטים ורישיונות</summary>
+        <p>הקלטות ברישיון CC0 (נחלת הכלל): שריקה מאת SpliceSound (Freesound), תותח ופעמון מאת Joseph Sardin (BigSoundBank.com).</p>
+        <p>גופנים: Heebo ו‑Rubik, ברישיון SIL Open Font License.</p>
+        <p>הלוגו, העיצוב והקוד נוצרו במיוחד לזינוק.</p>
+      </details>
+    </div>
+    <p class="credits">© 2026 זינוק</p>
   </div>
 </section>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <div class="install-bg" id="installBg" hidden></div>
 <div class="install" id="install" role="dialog" aria-modal="true" aria-labelledby="instTitle" hidden>
@@ -1000,6 +1036,20 @@
     syncRow();
     if(ios&&canOffer()&&!snoozed()) setTimeout(()=>{ if(!state.running) open(); },1600);
   })();
+
+  /* ---- share the app ---- */
+  const SHARE_URL='https://kafriron-ship-it.github.io/zinuk/';
+  const SHARE_TEXT='⛵ זינוק – טיימר הזנקות לשיוט\nספירה עם צופר, רולינג סטארט, דחייה והחזרה. עובד גם בלי קליטה בים.\nאייפון: פתח בספארי ← שיתוף ← "הוסף למסך הבית"';
+  let toastTimer=null;
+  function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ t.hidden=true; },2200); }
+  $('#shareBtn').onclick=async()=>{
+    if(navigator.share){
+      try{ await navigator.share({title:'זינוק',text:SHARE_TEXT,url:SHARE_URL}); return; }
+      catch(e){ if(e&&e.name==='AbortError') return; }
+    }
+    try{ await navigator.clipboard.writeText(SHARE_TEXT+'\n'+SHARE_URL); toast('הקישור הועתק, אפשר להדביק בוואטסאפ'); }
+    catch(e){ toast(SHARE_URL); }
+  };
 
   renderChips(); syncRolling(); reset();
 })();
