@@ -1,14 +1,14 @@
-// זינוק service worker: the whole app (page, sounds, icons, fonts) works offline on the water.
+// זינוק service worker: the whole app (page, sounds, fonts, icons) works offline on the water.
 // Page: network first with a short timeout, so updates arrive as soon as there is signal.
 // Everything else: served from cache instantly and refreshed in the background.
-const CACHE = 'zinuk-v1';
+const CACHE = 'zinuk-v2';
 const SHELL = [
   './', 'index.html', 'manifest.json',
   'sounds/whistle.mp3', 'sounds/cannon.mp3', 'sounds/bell.mp3',
+  'fonts/heebo-hebrew.woff2', 'fonts/heebo-latin.woff2', 'fonts/rubik-hebrew.woff2', 'fonts/rubik-latin.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png',
   'icons/apple-touch-icon.png', 'icons/favicon-64.png',
 ];
-const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -27,7 +27,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   const sameOrigin = url.origin === location.origin;
-  if (!sameOrigin && !FONT_HOSTS.includes(url.hostname)) return;
+  if (!sameOrigin) return;
 
   if (req.mode === 'navigate') {
     e.respondWith((async () => {
@@ -44,7 +44,7 @@ self.addEventListener('fetch', e => {
 
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const hit = await cache.match(req, { ignoreSearch: sameOrigin });
+    const hit = await cache.match(req, { ignoreSearch: true });
     const net = fetch(req).then(res => {
       if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
       return res;

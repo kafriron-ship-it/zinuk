@@ -18,10 +18,15 @@
   body{margin:0;font-size:14px}
   img{max-width:100%}
   [hidden]{display:none!important}
+
+  /* fonts are hosted with the app (SIL OFL, see fonts/OFL-*.txt): no third-party requests, and they work offline */
+  @font-face{font-family:'Heebo';font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/heebo-hebrew.woff2) format('woff2');unicode-range:U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+  @font-face{font-family:'Heebo';font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/heebo-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:'Rubik';font-style:normal;font-weight:300 900;font-display:swap;src:url(fonts/rubik-hebrew.woff2) format('woff2');unicode-range:U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+  @font-face{font-family:'Rubik';font-style:normal;font-weight:300 900;font-display:swap;src:url(fonts/rubik-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;700;800&family=Rubik:wght@600;800;900&display=swap">
+<link rel="preload" href="fonts/rubik-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/heebo-hebrew.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   /* Layout: phone-first instrument — a stopwatch dial fills the middle, chips above, controls below, waves drift underneath */
   :root{
@@ -341,12 +346,12 @@
       <details>
         <summary>פרטיות</summary>
         <p>זינוק לא אוסף מידע אישי: אין הרשמה, אין מעקב, אין פרסומות ואין עוגיות. ההגדרות והזמנים השמורים נשמרים רק בטלפון שלך ולא נשלחים לשום מקום.</p>
-        <p>האתר מתארח ב‑GitHub Pages. כמו כל שרת, GitHub רושם נתונים טכניים בסיסיים של הגלישה, למשל כתובת IP, לפי מדיניות הפרטיות שלו. הגופנים נטענים מ‑Google Fonts.</p>
+        <p>האתר מתארח ב‑GitHub Pages. כמו כל שרת, GitHub רושם נתונים טכניים בסיסיים של הגלישה, למשל כתובת IP, לפי מדיניות הפרטיות שלו. האפליקציה לא פונה לשום שירות אחר.</p>
       </details>
       <details>
         <summary>קרדיטים ורישיונות</summary>
         <p>הקלטות ברישיון CC0 (נחלת הכלל): שריקה מאת SpliceSound (Freesound), תותח ופעמון מאת Joseph Sardin (BigSoundBank.com).</p>
-        <p>גופנים: Heebo ו‑Rubik, ברישיון SIL Open Font License.</p>
+        <p>גופנים: Heebo (The Heebo Project Authors) ו‑Rubik (The Rubik Project Authors), ברישיון SIL Open Font License 1.1, מצורפים לאפליקציה.</p>
         <p>הלוגו, העיצוב והקוד נוצרו במיוחד לזינוק.</p>
       </details>
     </div>

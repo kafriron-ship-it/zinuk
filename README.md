@@ -14,6 +14,7 @@
 - `sw.js` — עבודה בלי אינטרנט (הדף, הצלילים, האייקונים והגופנים נשמרים במכשיר).
 - `manifest.json`, `icons/` — התקנה כאפליקציה.
 - `sounds/` — הקלטות.
+- `fonts/` — גופנים ורישיונות.
 
 ## תנאי שימוש ופרטיות
 - זינוק ניתן בחינם וכמות שהוא (AS IS), בלי אחריות מכל סוג; השימוש על אחריות המשתמש.
@@ -26,4 +27,5 @@
 - שריקה: SpliceSound, דרך Freesound / Wikimedia Commons.
 - תותח ופעמון: Joseph Sardin, BigSoundBank.com.
 
-גופנים: Heebo ו‑Rubik (SIL Open Font License).
+גופנים: Heebo ו‑Rubik, ברישיון SIL Open Font License 1.1. הקבצים מצורפים בתיקייה `fonts/` יחד עם הרישיונות (`OFL-Heebo.txt`, `OFL-Rubik.txt`).
+האפליקציה לא פונה לשום שירות חיצוני.
